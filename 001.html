@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f5f7fb;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --primary: #547b83;
+            --primary-600: #4a6e76;
+            --primary-700: #3e5e65;
+            --ring: rgba(84, 123, 131, 0.35);
+            --chip-bg: #eef6f8;
+            --chip-text: #2b5560;
+            --danger: #dc3545;
+            --border: #e5e7eb;
+        }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            background: var(--bg);
+            padding: 30px;
+            max-width: 600px;
+            margin: auto;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #547b83;
+        }
+
+        form {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(17, 24, 39, 0.06);
+            border: 1px solid var(--border);
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-top: 15px;
+            color: var(--muted);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 90%;
+            padding: 10px 12px;
+            margin-top: 6px;
+            border: 1px solid var(--border);
+            outline: none;
+            border-radius: 8px;
+            background: #fff;
+            color: var(--text);
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        input::placeholder {
+            color: var(--muted);
+            opacity: 0.8;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--ring);
+        }
+
+        button {
+            background-color: var(--primary);
+            color: #fff;
+            padding: 10px 14px;
+            margin-top: 8px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.05s ease, background-color 0.15s ease;
+        }
+
+        button:hover {
+            background-color: var(--primary-600);
+        }
+
+        button:active {
+            transform: translateY(1px);
+            background-color: var(--primary-700);
+        }
+
+        .chips-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .chip {
+            background-color: var(--chip-bg);
+            color: var(--chip-text);
+            padding: 6px 10px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            font-size: 14px;
+            border: 1px solid #d8e7ea;
+        }
+
+        .chip span {
+            margin-left: 6px;
+            cursor: pointer;
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        .chip button.remove-btn {
+            margin-left: 6px;
+            cursor: pointer;
+            color: var(--danger);
+            font-weight: 600;
+            background: transparent;
+            border: none;
+            display: flex;
+            align-items: center;
+            padding: 0 2px;
+        }
+
+        .chip button.remove-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .inline-group {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .inline-group input,
+        .inline-group select {
+            flex: 1 1 auto;
+        }
+
+        .inline-group button {
+            flex: 0 0 auto;
+            white-space: nowrap;
+        }
+
+        .submit-btn {
+            width: 100%;
+            margin-top: 20px;
+            font-size: 16px;
+            background: linear-gradient(180deg, var(--primary), var(--primary-600));
+            box-shadow: 0 6px 14px rgba(84, 123, 131, 0.25);
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Create New Movie</h2>
+
+    <form id="movieForm">
+        <!-- Title -->
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" required>
+
+        <!-- Year -->
+        <label for="year">Year:</label>
+        <input type="number" id="year" name="year" required>
+
+        <!-- Actors -->
+        <label for="actorInput">Actors:</label>
+        <div class="inline-group">
+            <input type="text" id="actorInput" placeholder="Enter actor name">
+            <button type="button" id="addActorBtn">➕ Add Actor</button>
+        </div>
+        <div class="chips-container" id="actorsList"></div>
+
+        <!-- Movie Types -->
+        <label for="typeSelect">Movie Types:</label>
+        <div class="inline-group">
+            <select id="typeSelect">
+                <option value="">-- Select Type --</option>
+                <option>Action</option>
+                <option>Comedy</option>
+                <option>Drama</option>
+                <option>Horror</option>
+                <option>Sci-Fi</option>
+                <option>Romance</option>
+            </select>
+            <button type="button" id="addTypeBtn">➕ Add Type</button>
+        </div>
+        <div class="chips-container" id="typesList"></div>
+
+        <!-- Hidden arrays -->
+        <div id="hiddenFields"></div>
+
+        <button type="submit" class="submit-btn">💾 Save Movie</button>
+    </form>
+
+    <script>
+        const actorInput = document.getElementById('actorInput');
+        const addActorBtn = document.getElementById('addActorBtn');
+        const actorsList = document.getElementById('actorsList');
+
+        const typeSelect = document.getElementById('typeSelect');
+        const addTypeBtn = document.getElementById('addTypeBtn');
+        const typesList = document.getElementById('typesList');
+
+        const hiddenFields = document.getElementById('hiddenFields');
+
+        let actors = [];
+        let types = [];
+
+        // Add Actor
+        function addActor() {
+            const name = actorInput.value.trim();
+            if (name && !actors.includes(name)) {
+                actors.push(name);
+                actorInput.value = '';
+                renderActors();
+                updateHiddenFields();
+            }
+        }
+
+        // Add Type
+        function addType() {
+            const type = typeSelect.value;
+            if (type && !types.includes(type)) {
+                types.push(type);
+                typeSelect.value = '';
+                renderTypes();
+                updateHiddenFields();
+            }
+        }
+
+        addActorBtn.addEventListener('click', addActor);
+        addTypeBtn.addEventListener('click', addType);
+
+        // ✅ Add actor by pressing Enter
+        actorInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // prevent form submission
+                addActor();
+            }
+        });
+
+        // Render actors chips
+        function renderActors() {
+            actorsList.innerHTML = '';
+            actors.forEach((actor, index) => {
+                const chip = document.createElement('div');
+                chip.className = 'chip';
+                chip.innerHTML = `${actor} <button class="remove-btn" aria-label="Remove actor" onclick="removeActor(${index})" title="Remove">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>`;
+                actorsList.appendChild(chip);
+            });
+        }
+
+        // Render types chips
+        function renderTypes() {
+            typesList.innerHTML = '';
+            types.forEach((type, index) => {
+                const chip = document.createElement('div');
+                chip.className = 'chip';
+                chip.innerHTML = `${type} <button class="remove-btn" aria-label="Remove type" onclick="removeType(${index})" title="Remove">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>`;
+                typesList.appendChild(chip);
+            });
+        }
+
+        // Remove actor
+        function removeActor(index) {
+            actors.splice(index, 1);
+            renderActors();
+            updateHiddenFields();
+        }
+
+        // Remove type
+        function removeType(index) {
+            types.splice(index, 1);
+            renderTypes();
+            updateHiddenFields();
+        }
+
+        // Update hidden inputs
+        function updateHiddenFields() {
+            hiddenFields.innerHTML = '';
+            actors.forEach(actor => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'actors[]';
+                input.value = actor;
+                hiddenFields.appendChild(input);
+            });
+
+            types.forEach(type => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'types[]';
+                input.value = type;
+                hiddenFields.appendChild(input);
+            });
+        }
+
+        // Handle form submit: save to localStorage
+        document.getElementById('movieForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const titleEl = document.getElementById('title');
+            const yearEl = document.getElementById('year');
+
+            const title = titleEl.value.trim();
+            const year = parseInt(yearEl.value, 10);
+            const currentYear = new Date().getFullYear();
+
+            // Basic validation
+            if (!title) {
+                alert('Please enter a movie title.');
+                titleEl.focus();
+                return;
+            }
+            if (!year || year < 1888 || year > currentYear + 1) {
+                alert(`Please enter a valid year between 1888 and ${currentYear + 1}.`);
+                yearEl.focus();
+                return;
+            }
+            if (actors.length === 0) {
+                alert('Please add at least one actor.');
+                actorInput.focus();
+                return;
+            }
+            if (types.length === 0) {
+                alert('Please add at least one movie type.');
+                typeSelect.focus();
+                return;
+            }
+
+            const movie = { title, year, actors: [...actors], types: [...types], createdAt: new Date().toISOString() };
+
+            const existing = JSON.parse(localStorage.getItem('movies') || '[]');
+            existing.push(movie);
+            localStorage.setItem('movies', JSON.stringify(existing));
+
+            alert('Movie saved to localStorage.');
+
+            // Reset form and state
+            e.target.reset();
+            actors = [];
+            types = [];
+            renderActors();
+            renderTypes();
+            updateHiddenFields();
+        });
+
+        // Expose remove functions globally
+        window.removeActor = removeActor;
+        window.removeType = removeType;
+    </script>
+
+</body>
+
+</html>
